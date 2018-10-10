@@ -206,7 +206,7 @@ struct AmountCellConfig<State> {
     let isVisibleKeyPath: KeyPath<State, Bool>
 
     //Amount
-    let amountValueKeyPath: WritableKeyPath<State, String>
+    let amountValueKeyPath: WritableKeyPath<State, String?>
     let amountColorKeyPath: KeyPath<State, UIColor>
     let amountPlaceholderValueKeyPath: KeyPath<State, String>
     let amountPlaceholderColorKeyPath: KeyPath<State, UIColor>
@@ -228,12 +228,103 @@ struct AmountCellConfig<State> {
 
 struct TextFieldConfig<State> {
     let isEditingKeyPath: KeyPath<State, Bool>
-    let valueKeyPath: WritableKeyPath<State, String>
+    let valueKeyPath: WritableKeyPath<State, String?>
     let colorKeyPath: KeyPath<State, UIColor>
     let font: UIFont
     let placeholderValueKeyPath: KeyPath<State, String>?
     let placeholderColorKeyPath: KeyPath<State, UIColor>?
 }
+
+//func amountCell2<State>(keyPath: WritableKeyPath<State, AmountCell>) -> Element<FormCell, State> {
+//    return { context in
+//        let cell = FormCell()
+//        let iconPadding: CGFloat = 15
+//
+//        let imageView = UIImageView(image: context.state[keyPath: keyPath].icon)
+//        imageView.translatesAutoresizingMaskIntoConstraints = false
+//
+//        cell.contentView.addSubview(imageView)
+//        cell.contentView.addConstraints([
+//            imageView.heightAnchor.constraint(equalToConstant: iconPadding),
+//            imageView.widthAnchor.constraint(equalToConstant: iconPadding),
+//            imageView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: iconPadding),
+//            imageView.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 21.0)
+//            ])
+//
+//        let textFieldConfig: TextFieldConfig<State> =
+//            TextFieldConfig(
+//                isEditingKeyPath: config.isEditingKeyPath,
+//                valueKeyPath: config.amountValueKeyPath,
+//                colorKeyPath: config.amountColorKeyPath,
+//                font: UIFont.systemFont(ofSize: 26.0, weight: .regular),
+//                placeholderValueKeyPath: config.amountPlaceholderValueKeyPath,
+//                placeholderColorKeyPath: config.amountPlaceholderColorKeyPath
+//        )
+//
+//        let amountTextField = textField(textFieldConfig)
+//        let renderedTextField = amountTextField(context)
+//
+//        let errorMessageLabel = uiLabel(keyPath: config.errorMessageKeyPath)
+//        let renderedErrorMessageLabel = errorMessageLabel(context)
+//
+//        let stackView = UIStackView(arrangedSubviews: [renderedTextField.element])
+//        stackView.axis = .vertical
+//        stackView.spacing = 0.0
+//        stackView.translatesAutoresizingMaskIntoConstraints = false
+//        stackView.setContentHuggingPriority(UILayoutPriority.defaultLow, for: .horizontal)
+//
+//        cell.contentView.addSubview(stackView)
+//        cell.contentView.addConstraints([
+//            stackView.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: iconPadding),
+//            stackView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+//            stackView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor)
+//            ])
+//
+//        let currencySeparatorView = UIView()
+//        currencySeparatorView.backgroundColor = UIColor.gray
+//        currencySeparatorView.translatesAutoresizingMaskIntoConstraints = false
+//
+//        cell.contentView.addSubview(currencySeparatorView)
+//        cell.contentView.addConstraints([
+//            currencySeparatorView.leadingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: iconPadding),
+//            currencySeparatorView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+//            currencySeparatorView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//            currencySeparatorView.widthAnchor.constraint(equalToConstant: 1.0)
+//            ])
+//
+//        let currencyButton = UIButton(type: .custom)
+//        currencyButton.translatesAutoresizingMaskIntoConstraints = false
+//
+//        cell.contentView.addSubview(currencyButton)
+//        cell.contentView.addConstraints([
+//            currencyButton.leadingAnchor.constraint(equalTo: currencySeparatorView.trailingAnchor),
+//            currencyButton.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+//            currencyButton.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//            currencyButton.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//            currencyButton.widthAnchor.constraint(equalToConstant: 60.0)
+//            ])
+//
+//        cell.contentView.addConstraints([
+//            cell.contentView.heightAnchor.constraint(equalToConstant: 56.0)
+//            ])
+//
+//        return RenderedElement(element: cell, strongReferences: renderedTextField.strongReferences + renderedErrorMessageLabel.strongReferences, update: { (state) in
+//            renderedTextField.update(state)
+//            renderedErrorMessageLabel.update(state)
+//            //            cell.isVisible = state[keyPath: config.isVisibleKeyPath]
+//            currencyButton.setTitle(state[keyPath: config.currencyValueKeyPath], for: .normal)
+//            currencyButton.setTitleColor(state[keyPath: config.currencyColorKeyPath], for: .normal)
+//            cell.accessoryType = state[keyPath: config.isEditingKeyPath] ? .disclosureIndicator : .none
+//
+//            if state[keyPath: config.isErrorMessageVisibleKeyPath] {
+//                stackView.addArrangedSubview(renderedErrorMessageLabel.element)
+//            } else if stackView.arrangedSubviews.contains(renderedErrorMessageLabel.element) {
+//                stackView.removeArrangedSubview(renderedErrorMessageLabel.element)
+//                renderedErrorMessageLabel.element.removeFromSuperview()
+//            }
+//        })
+//    }
+//}
 
 func amountCell<State>(_ config: AmountCellConfig<State>) -> Element<FormCell, State> {
     return { context in
@@ -559,7 +650,8 @@ func detailTextCell<State>(title: String, keyPath: KeyPath<State, String>, isEdi
         return RenderedElement(element: cell, strongReferences: rendered.strongReferences, update: update)
     }
 }
-
+//bind(form: hotspotForm, to: \.hotspot))
+//]),
 func bind<State, NestedState>(form: @escaping Form<NestedState>, to keyPath: WritableKeyPath<State, NestedState>) -> Form<State> {
     return { context in
         let nestedContext = RenderingContext<NestedState>(state: context.state[keyPath: keyPath], change: { nestedChange in
@@ -573,6 +665,34 @@ func bind<State, NestedState>(form: @escaping Form<NestedState>, to keyPath: Wri
         })
     }
 }
+
+//func bind<State, NestedState>(element: @escaping Element<FormCell, State>, to keyPath: WritableKeyPath<State, NestedState>) -> Element<FormCell, State> {
+//    return { context in
+//        let nestedContext = RenderingContext<NestedState>(state: context.state[keyPath: keyPath], change: { nestedChange in
+//            context.change { state in
+//                nestedChange(&state[keyPath: keyPath])
+//            }
+//        }, pushViewController: context.pushViewController, popViewController: context.popViewController)
+////        let sections = element(nestedContext)
+//        return RenderedElement<[Section], State>(element: sections.element, strongReferences: sections.strongReferences, update: { state in
+//            sections.update(state[keyPath: keyPath])
+//        })
+//    }
+//}
+
+//func bind<State, NestedState>(form: @escaping Form<NestedState>, to keyPath: WritableKeyPath<State, NestedState>) -> Form<State> {
+//    return { context in
+//        let nestedContext = RenderingContext<NestedState>(state: context.state[keyPath: keyPath], change: { nestedChange in
+//            context.change { state in
+//                nestedChange(&state[keyPath: keyPath])
+//            }
+//        }, pushViewController: context.pushViewController, popViewController: context.popViewController)
+//        let sections = form(nestedContext)
+//        return RenderedElement<[Section], State>(element: sections.element, strongReferences: sections.strongReferences, update: { state in
+//            sections.update(state[keyPath: keyPath])
+//        })
+//    }
+//}
 
 func section<State>(_ cells: [Element<FormCell, State>], footer keyPath: KeyPath<State, String?>? = nil, isVisible: KeyPath<State, Bool>? = nil) -> Element<Section, State> {
     return { context in
